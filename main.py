@@ -3,7 +3,7 @@ from io import BytesIO
 
 import requests
 from PIL import Image
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile
 from sentence_transformers import SentenceTransformer
 
 app = FastAPI()
@@ -57,7 +57,7 @@ def get_image_embedding(img):
 
 
 @app.post("/image_http_to_vector/")
-async def image_to_vector(image_url: str = Form(...)):
+async def image_to_vector(image_url: str):
     image = load_image(image_url)
     img_embedding = get_image_embedding(image)
     return {"embedding": img_embedding}
