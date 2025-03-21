@@ -3,7 +3,7 @@ from io import BytesIO
 
 import requests
 from PIL import Image
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Form
 from sentence_transformers import SentenceTransformer
 
 app = FastAPI()
@@ -28,8 +28,8 @@ headers = {
 model = SentenceTransformer('clip-ViT-B-32')
 
 
-def load_image(image_url: str):
-    if image_url.startswith("http"):
+def load_image(image_url):
+    if isinstance(image_url, str):
         response = requests.get(image_url, headers=headers)
         image = Image.open(BytesIO(response.content))
         if image.mode == "P" and "transparency" in image.info:
@@ -56,13 +56,14 @@ def get_image_embedding(img):
     return img_embeddings
 
 
-# @app.post("/image-to-vector/")
-# async def image_to_vector(image_url: str = Form(...)):
-#     image = load_image(image_url)
-#     img_embedding = get_image_embedding(image)
-#     return {"embedding": img_embedding}
+@app.post("/image_http_to_vector/")
+async def image_to_vector(image_url: str = Form(...)):
+    image = load_image(image_url)
+    img_embedding = get_image_embedding(image)
+    return {"embedding": img_embedding}
 
-@app.post("/image-to-vector/")
+
+@app.post("/image_file_to_vector/")
 async def image_to_vector(file: UploadFile = File(...)):
     image = load_image(file)
     img_embedding = get_image_embedding(image)
