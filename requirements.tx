@@ -2,3 +2,4 @@ fastapi
 sentence-transformers
 pillow
 uvicorn
+python-multipart
