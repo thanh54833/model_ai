@@ -2,8 +2,6 @@ import random
 
 from locust import HttpUser, task, between
 
--- 271800
-
 
 class LoadTestUser(HttpUser):
     wait_time = between(1, 5)
