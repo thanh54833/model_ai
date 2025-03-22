@@ -60,11 +60,11 @@ def get_image_embedding(img):
 async def image_to_vector(image_url: str):
     image = load_image(image_url)
     img_embedding = get_image_embedding(image)
-    return {"embedding": img_embedding}
+    return img_embedding
 
 
 @app.post("/image_file_to_vector/")
 async def image_to_vector(file: UploadFile = File(...)):
     image = load_image(file)
     img_embedding = get_image_embedding(image)
-    return {"embedding": img_embedding}
+    return img_embedding
