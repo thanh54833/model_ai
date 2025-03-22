@@ -114,20 +114,22 @@ class LoadTestUser(HttpUser):
         keyword = random.choice(self.keywords)["name"]
 
         self.client.post(
-            url="/api/se/product-search/search_text",
+            url="/api/product-search/search_text",
             headers={
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Il9HSDZrYllkZ3RxZDdLNHNrUW1uSGI4dUh6OCIsImtpZCI6Il9HSDZrYllkZ3RxZDdLNHNrUW1uSGI4dUh6OCJ9.eyJpc3MiOiJjb25jdW5nLmNvbSIsImF1ZCI6ImNvbmN1bmcuY29tL3Jlc291cmNlcyIsImV4cCI6MTc0MjYyOTk1NCwibmJmIjoxNzQyNjI2MzU0LCJjbGllbnRfaWQiOiJDQ0kuU3dhZ2dlci5DbGllbnRDcmVkZW50aWFsIiwic2NvcGUiOiJDQ0kuU3dhZ2dlciIsInN1YiI6IjE3NDIiLCJhdXRoX3RpbWUiOjE3NDI2MDM0NDUsImlkcCI6Imlkc3J2IiwiL1VzZXJJRCI6IjE3NDIiLCIvVXNlcm5hbWUiOiIyNzQxIiwiL0F2YXRhciI6ImF2YS8yMDI0MDkwOS9jZmRiMDVjZi0xMGFjLTQzMmMtODViMC1jNTIxYmI0MzgxMTQucG5nIiwiL1VzZXJUeXBlSUQiOiIxIiwiL1N1cHBsaWVySUQiOiIwIiwiL0Z1bGxuYW1lIjoiTMOqIEjhu5MgSGnhur91IEdpYW5nIiwiL0RlcGFydG1lbnRJRCI6IjI0NyIsIi9Qb3NpdGlvbklEIjoiMTI3IiwiL1N0b3JlSUQiOiI0NDEiLCIvR2VuZGVyIjoiMiIsIi9FbXBsb3llZUlEIjoiMTc0MSIsIi9WUE5Vc2VybmFtZSI6IjIwOTciLCIvVlBOUGFzc3dvcmQiOiJLdWFqWEM5eWJ6IiwiL1JvbGVJRHMiOiJbMzE1MywzMTk0LDMxNzYsMzI4MSwzMjIxLDMzMDksMzMwMSwzMzI4LDM0MDEsMzQyMywzNDQxLDM0NTEsMzQxNCwzMTc1LDMyNDUsMzQ4NywzMTQ3XSIsImFtciI6WyJwYXNzd29yZCJdfQ.X0kVpqreImlyYydvvoQB1ViNrF8jMVhgZ4AiozXLfIpc9XslU3UKSMYrvcylYMw8-j3InH13PF2ow7sh9IgNqJIFEMu8wXUS8F_NGa0wiloi_AUmuECD-gLXkT3mJn6EYI496A2OnEjMPWCC4Rv0NIRS9hkcFDhJCvNQ8uIQHO9xS7V1N3_If6JUTTHOhVPzJXfPhwGm-YD5a-aeJvqL4Qf_NwYVUbGoYXoxXKxR0Awujux7HrTB11OsaNchD8WmGDY-XhFQwi3Vq1ozIkURD0rOESqaiTIXbAQ7ZMJBes0QO8OWOo8JeMIP-Q9U8xV8RKmmTDdQXjKPFND9wg5_wg"
+                "Accept": "*/*",
+                "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Il9HSDZrYllkZ3RxZDdLNHNrUW1uSGI4dUh6OCIsImtpZCI6Il9HSDZrYllkZ3RxZDdLNHNrUW1uSGI4dUh6OCJ9.eyJpc3MiOiJjb25jdW5nLmNvbSIsImF1ZCI6ImNvbmN1bmcuY29tL3Jlc291cmNlcyIsImV4cCI6MTc0MjYyOTk1NCwibmJmIjoxNzQyNjI2MzU0LCJjbGllbnRfaWQiOiJDQ0kuU3dhZ2dlci5DbGllbnRDcmVkZW50aWFsIiwic2NvcGUiOiJDQ0kuU3dhZ2dlciIsInN1YiI6IjE3NDIiLCJhdXRoX3RpbWUiOjE3NDI2MDM0NDUsImlkcCI6Imlkc3J2IiwiL1VzZXJJRCI6IjE3NDIiLCIvVXNlcm5hbWUiOiIyNzQxIiwiL0F2YXRhciI6ImF2YS8yMDI0MDkwOS9jZmRiMDVjZi0xMGFjLTQzMmMtODViMC1jNTIxYmI0MzgxMTQucG5nIiwiL1VzZXJUeXBlSUQiOiIxIiwiL1N1cHBsaWVySUQiOiIwIiwiL0Z1bGxuYW1lIjoiTMOqIEjhu5MgSGnhur91IEdpYW5nIiwiL0RlcGFydG1lbnRJRCI6IjI0NyIsIi9Qb3NpdGlvbklEIjoiMTI3IiwiL1N0b3JlSUQiOiI0NDEiLCIvR2VuZGVyIjoiMiIsIi9FbXBsb3llZUlEIjoiMTc0MSIsIi9WUE5Vc2VybmFtZSI6IjIwOTciLCIvVlBOUGFzc3dvcmQiOiJLdWFqWEM5eWJ6IiwiL1JvbGVJRHMiOiJbMzE1MywzMTk0LDMxNzYsMzI4MSwzMjIxLDMzMDksMzMwMSwzMzI4LDM0MDEsMzQyMywzNDQxLDM0NTEsMzQxNCwzMTc1LDMyNDUsMzQ4NywzMTQ3XSIsImFtciI6WyJwYXNzd29yZCJdfQ.X0kVpqreImlyYydvvoQB1ViNrF8jMVhgZ4AiozXLfIpc9XslU3UKSMYrvcylYMw8-j3InH13PF2ow7sh9IgNqJIFEMu8wXUS8F_NGa0wiloi_AUmuECD-gLXkT3mJn6EYI496A2OnEjMPWCC4Rv0NIRS9hkcFDhJCvNQ8uIQHO9xS7V1N3_If6JUTTHOhVPzJXfPhwGm-YD5a-aeJvqL4Qf_NwYVUbGoYXoxXKxR0Awujux7HrTB11OsaNchD8WmGDY-XhFQwi3Vq1ozIkURD0rOESqaiTIXbAQ7ZMJBes0QO8OWOo8JeMIP-Q9U8xV8RKmmTDdQXjKPFND9wg5_wg",
+                "Content-Type": "application/json-patch+json"
             },
             json={
                 "q": keyword,
-                "page_index": 1,
-                "page_size": 36,
                 "filter_by": "",
                 "sort_by": "",
                 "facet_by": "",
-                "is_search_for_ecom5": True,
+                "page_index": 1,
+                "page_size": 10,
+                "district_id": 0,
+                "include_fields": "",
+                "is_search_for_ecom5": False,
                 "is_return_filter": True
             }
         )
