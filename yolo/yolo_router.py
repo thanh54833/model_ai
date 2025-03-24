@@ -9,10 +9,9 @@ from ultralytics import YOLO
 
 yolo_router = APIRouter()
 
-model = YOLO("yolov8x.pt")  # Use "yolov8n.pt" for smaller model, "yolov8x.pt" for larger
+model = YOLO("yolo11n.pt")
 
-
-def detect_and_crop_objects(image: Image.Image, margin=10):
+def detect_and_crop_objects(image: Image.Image, margin=0):
     img_width, img_height = image.size
 
     # Perform object detection
@@ -42,23 +41,23 @@ def detect_and_crop_objects(image: Image.Image, margin=10):
 
     print(f"Cropped {len(boxes)} objects!")
 
-    return cropped_images
+    return cropped_images, confidences
 
 
 @yolo_router.post("/detect-and-crop/")
 async def detect_and_crop(file: UploadFile = File(...)):
-    image = Image.open(io.BytesIO(await file.read()))
-    cropped_images = detect_and_crop_objects(image)
+    image_ = Image.open(io.BytesIO(await file.read()))
 
-    # Convert cropped images to base64 strings
+    width, height = image_.size
+    image = image_.resize((600, int(height * 600/width)))
+
+    cropped_images, confidences = detect_and_crop_objects(image)
+    # Convert cropped images to base64 strings and include confidence scores
     cropped_images_base64 = []
-    for cropped_image in cropped_images:
+    for cropped_image, conf in zip(cropped_images, confidences):
         buffered = io.BytesIO()
         cropped_image.save(buffered, format="PNG")
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-        cropped_images_base64.append(img_str)
+        cropped_images_base64.append({"image": img_str, "score": conf})
 
-    return JSONResponse(content={"cropped_images": cropped_images_base64})
-
-# To run the FastAPI app, use the following command:
-# uvicorn yolo_router:app --reload
+    return JSONResponse(content=cropped_images_base64)
