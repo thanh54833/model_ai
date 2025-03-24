@@ -11,6 +11,7 @@ yolo_router = APIRouter()
 
 model = YOLO("yolov8x.pt")  # Use "yolov8n.pt" for smaller model, "yolov8x.pt" for larger
 
+
 def detect_and_crop_objects(image: Image.Image, margin=10):
     img_width, img_height = image.size
 
@@ -42,6 +43,7 @@ def detect_and_crop_objects(image: Image.Image, margin=10):
     print(f"Cropped {len(boxes)} objects!")
 
     return cropped_images
+
 
 @yolo_router.post("/detect-and-crop/")
 async def detect_and_crop(file: UploadFile = File(...)):
