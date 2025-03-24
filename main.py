@@ -25,7 +25,7 @@ headers = {
 }
 
 model = SentenceTransformer('clip-ViT-B-32')
-od_pipe = pipeline(task="object-detection", model="facebook/detr-resnet-50", threshold=0.5)
+od_pipe = pipeline(task="object-detection", model="facebook/detr-resnet-50", threshold=0.1)
 
 
 async def load_image(image_input):
@@ -64,14 +64,14 @@ async def detect_objects(file: UploadFile = File(...)):
 
     # Check if the image is from a mobile device or a specific camera
     print(f"aspect_ratio : ${image.width} ${image.height} ", aspect_ratio)
-    if aspect_ratio < 1:  # Taller image, likely from a mobile device
-        new_height = 600
-        new_width = int(new_height * aspect_ratio)
-    else:
-        new_width = 600
-        new_height = int(new_width / aspect_ratio)
+    # if aspect_ratio < 1:  # Taller image, likely from a mobile device
+    #     new_height = 800
+    #     new_width = int(new_height * aspect_ratio)
+    # else:
+    #     new_width = 800
+    #     new_height = int(new_width / aspect_ratio)
 
-    raw_image = image.resize((new_width, new_height))
+    raw_image = image.resize((600 , 400))
 
     pipeline_output = od_pipe(raw_image)
     image_width, image_height = raw_image.size
