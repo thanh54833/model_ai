@@ -60,10 +60,10 @@ async def image_to_vector(file: UploadFile = File(...)):
 @app.post("/detect_objects/")
 async def detect_objects(file: UploadFile = File(...)):
     image = await load_image(file)
-    aspect_ratio = image.width / image.height
+    #aspect_ratio = image.width / image.height
 
     # Check if the image is from a mobile device or a specific camera
-    print(f"aspect_ratio : ${image.width} ${image.height} ", aspect_ratio)
+    #print(f"aspect_ratio : ${image.width} ${image.height} ", aspect_ratio)
     # if aspect_ratio < 1:  # Taller image, likely from a mobile device
     #     new_height = 800
     #     new_width = int(new_height * aspect_ratio)
@@ -71,29 +71,31 @@ async def detect_objects(file: UploadFile = File(...)):
     #     new_width = 800
     #     new_height = int(new_width / aspect_ratio)
 
-    raw_image = image.resize((600 , 400))
+    raw_image = image.resize((400, 600))
 
+
+    # Detect objects
     pipeline_output = od_pipe(raw_image)
-    image_width, image_height = raw_image.size
 
     # Filter out objects that are not fully visible
-    # fully_visible_objects = [
-    #     result for result in pipeline_output
-    #     if result['box']['xmin'] > 0 and result['box']['ymin'] > 0
-    #        and result['box']['xmax'] <= image_width and result['box']['ymax'] <= image_height
-    # ]
+    image_width, image_height = raw_image.size
+    fully_visible_objects = [
+        result for result in pipeline_output
+        if result['box']['xmin'] > 0 and result['box']['ymin'] > 0
+           and result['box']['xmax'] < image_width and result['box']['ymax'] < image_height
+    ]
 
     # Calculate the size of each bounding box and sort by size (width * height)
-    for result in pipeline_output:
+    for result in fully_visible_objects:
         box = result['box']
         result['size'] = (box['xmax'] - box['xmin']) * (box['ymax'] - box['ymin'])
 
-    sorted_size = sorted(pipeline_output, key=lambda x: x['size'], reverse=True)
+    # sorted_size = sorted(pipeline_output, key=lambda x: x['size'], reverse=True)
     # sort_top_2 = sorted_size[:3]
     # sorted_score = sorted(sort_top_2, key=lambda x: x['score'], reverse=True)
 
     # Crop images and convert to base64 strings
-    for result in sorted_size:
+    for result in fully_visible_objects:
         box = result['box']
         cropped_image = raw_image.crop((box['xmin'], box['ymin'], box['xmax'], box['ymax']))
         buffered = BytesIO()
@@ -101,4 +103,4 @@ async def detect_objects(file: UploadFile = File(...)):
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
         result["image"] = img_str
 
-    return JSONResponse(content=sorted_size)
+    return JSONResponse(content=fully_visible_objects)
