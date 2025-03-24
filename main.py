@@ -69,8 +69,10 @@ async def detect_objects(file: UploadFile = File(...)):
         result['size'] = (box['xmax'] - box['xmin']) * (box['ymax'] - box['ymin'])
     sorted_output = sorted(pipeline_output, key=lambda x: x['size'], reverse=True)
 
+    top_2_output = sorted_output[:2]
+
     # Crop images and convert to base64 strings
-    for result in sorted_output:
+    for result in top_2_output:
         box = result['box']
         cropped_image = raw_image.crop((box['xmin'], box['ymin'], box['xmax'], box['ymax']))
         buffered = BytesIO()
@@ -78,4 +80,4 @@ async def detect_objects(file: UploadFile = File(...)):
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
         result["image"] = img_str
 
-    return JSONResponse(content=sorted_output)
+    return JSONResponse(content=top_2_output)
