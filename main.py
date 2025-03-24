@@ -65,9 +65,13 @@ async def detect_objects(file: UploadFile = File(...)):
     # Check if the image is from a mobile device or a specific camera
     print(f"aspect_ratio : ${image.width} ${image.height} ", aspect_ratio)
     if aspect_ratio < 1:  # Taller image, likely from a mobile device
-        raw_image = image.resize((400, 800))
+        new_height = 600
+        new_width = int(new_height * aspect_ratio)
     else:
-        raw_image = image.resize((800, 400))
+        new_width = 600
+        new_height = int(new_width / aspect_ratio)
+
+    raw_image = image.resize((new_width, new_height))
 
     pipeline_output = od_pipe(raw_image)
     image_width, image_height = raw_image.size
