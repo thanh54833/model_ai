@@ -60,7 +60,7 @@ async def image_to_vector(file: UploadFile = File(...)):
 @app.post("/detect_objects/")
 async def detect_objects(file: UploadFile = File(...)):
     image = await load_image(file)
-    image.save(file.filename)
+    image.save("image_input.jpg")
     # aspect_ratio = image.width / image.height
 
     # Check if the image is from a mobile device or a specific camera
@@ -73,8 +73,6 @@ async def detect_objects(file: UploadFile = File(...)):
     #     new_height = int(new_width / aspect_ratio)
 
     raw_image = image.resize((400, 600))
-
-    raw_image.save("image_input.jpg")
 
     # Detect objects
     pipeline_output = od_pipe(raw_image)
