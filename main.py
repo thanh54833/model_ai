@@ -8,7 +8,18 @@ from fastapi import FastAPI, File, UploadFile
 from sentence_transformers import SentenceTransformer
 from transformers import pipeline
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+# Add the CORS middleware to the FastAPI application
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow specific origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 headers = {
     "authority": "cdn1.concung.com",
