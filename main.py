@@ -91,25 +91,6 @@ async def image_to_vector(file: UploadFile = File(...)):
     return img_embedding
 
 
-# @app.post("/detect_objects/")
-# async def detect_objects(file: UploadFile = File(...)):
-#     image = await load_image(file)
-#     pipeline_output = od_pipe(image)
-#     boxes = [(r['box']['xmin'], r['box']['ymin'], r['box']['xmax'], r['box']['ymax']) for r in pipeline_output]
-#     scores = [r['score'] for r in pipeline_output]
-#     keep_indices = non_max_suppression(boxes, scores, iou_threshold=0.5)
-#     filtered_results = [pipeline_output[i] for i in keep_indices]
-#     cropped_objects = get_cropped_objects(image, filtered_results)
-#
-#     result = []
-#     for img, score in cropped_objects:
-#         buffered = BytesIO()
-#         img.save(buffered, format="PNG")
-#         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-#         result.append({"score": score, "image": img_str})
-#
-#     return JSONResponse(content=result)
-
 @app.post("/detect_objects/")
 async def detect_objects(file: UploadFile = File(...)):
     image = await load_image(file)
@@ -123,13 +104,17 @@ async def detect_objects(file: UploadFile = File(...)):
     if not cropped_objects:
         return JSONResponse(content=[])
 
-    # Find the largest object by area
-    largest_object = max(cropped_objects, key=lambda x: (x[0].width * x[0].height))
+    # Select top 3 objects by score
+    top_3_objects = sorted(cropped_objects, key=lambda x: x[1], reverse=True)[:3]
 
-    img, score = largest_object
-    buffered = BytesIO()
-    img.save(buffered, format="PNG")
-    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-    result = {"score": score, "image": img_str}
+    # Sort the top 3 objects by area (width * height)
+    sorted_objects = sorted(top_3_objects, key=lambda x: (x[0].width * x[0].height), reverse=True)
 
-    return JSONResponse(content=[result])
+    result = []
+    for img, score in sorted_objects:
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        result.append({"score": score, "image": img_str})
+
+    return JSONResponse(content=result)
