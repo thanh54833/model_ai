@@ -1,14 +1,14 @@
 import base64
 import io
 from io import BytesIO
-import os
+
 import requests
-from PIL import Image, ImageDraw
+from PIL import Image
 from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sentence_transformers import SentenceTransformer
 from transformers import pipeline
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
