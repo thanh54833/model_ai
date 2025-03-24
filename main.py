@@ -10,7 +10,10 @@ from fastapi.responses import JSONResponse
 from sentence_transformers import SentenceTransformer
 from transformers import pipeline
 
+from yolo.yolo_router import yolo_router
+
 app = FastAPI()
+app.add_route("/yolo", yolo_router)
 
 app.add_middleware(
     CORSMiddleware,
