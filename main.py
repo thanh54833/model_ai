@@ -104,14 +104,14 @@ async def detect_objects(file: UploadFile = File(...)):
     if not cropped_objects:
         return JSONResponse(content=[])
 
-    # Select top 3 objects by score
-    top_3_objects = sorted(cropped_objects, key=lambda x: x[1], reverse=True)[:3]
-
-    # Sort the top 3 objects by area (width * height)
-    sorted_objects = sorted(top_3_objects, key=lambda x: (x[0].width * x[0].height), reverse=True)
-
+    # # Select top 3 objects by score
+    # top_3_objects = sorted(cropped_objects, key=lambda x: x[1], reverse=True)[:3]
+    #
+    # # Sort the top 3 objects by area (width * height)
+    # sorted_objects = sorted(top_3_objects, key=lambda x: (x[0].width * x[0].height), reverse=True)
+    #
     result = []
-    for img, score in sorted_objects:
+    for img, score in cropped_objects:
         buffered = BytesIO()
         img.save(buffered, format="PNG")
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
