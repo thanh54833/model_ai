@@ -41,6 +41,7 @@ headers = {
 model = SentenceTransformer('clip-ViT-B-32')
 od_pipe = pipeline(task="object-detection", model="facebook/detr-resnet-50", threshold=0.1)
 
+
 def load_image(image_url):
     if isinstance(image_url, str):
         response = requests.get(image_url, headers=headers)
@@ -53,6 +54,7 @@ def load_image(image_url):
         if image.mode == "P" and "transparency" in image.info:
             image = image.convert("RGBA")
         return image
+
 
 def get_image_embedding(img):
     img_embeddings = (
@@ -67,6 +69,7 @@ def get_image_embedding(img):
     )
     return img_embeddings
 
+
 def get_cropped_objects(image, results):
     return [(
         image.crop((r['box']['xmin'], r['box']['ymin'], r['box']['xmax'], r['box']['ymax'])),
@@ -74,17 +77,20 @@ def get_cropped_objects(image, results):
         r['score']
     ) for r in results]
 
+
 @app.post("/image_http_to_vector/")
 async def image_to_vector(image_url: str):
     image = load_image(image_url)
     img_embedding = get_image_embedding(image)
     return img_embedding
 
+
 @app.post("/image_file_to_vector/")
 async def image_to_vector(file: UploadFile = File(...)):
     image = load_image(file)
     img_embedding = get_image_embedding(image)
     return img_embedding
+
 
 # @app.post("/detect_objects/")
 # async def detect_objects(file: UploadFile = File(...)):
@@ -100,10 +106,10 @@ async def detect_objects(file: UploadFile = File(...)):
     cropped_objects = get_cropped_objects(image, pipeline_output)
 
     result = []
-    for img, label, score in cropped_objects:
+    for img, _, score in cropped_objects:  # Ignore the label
         buffered = BytesIO()
         img.save(buffered, format="PNG")
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-        result.append({"label": label, "score": score, "image": img_str})
+        result.append({"score": score, "image": img_str})
 
     return JSONResponse(content=result)
