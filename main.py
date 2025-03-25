@@ -1,14 +1,13 @@
-import base64
 import io
 from io import BytesIO
 
+import numpy as np
 import requests
 from PIL import Image
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sentence_transformers import SentenceTransformer
-from transformers import pipeline
 
 from yolo.yolo_router import yolo_router
 
@@ -28,6 +27,8 @@ headers = {
 }
 
 model = SentenceTransformer('clip-ViT-B-32')
+
+
 # od_pipe = pipeline(task="object-detection", model="facebook/detr-resnet-50", threshold=0.1)
 
 
@@ -58,3 +59,17 @@ async def image_to_vector(file: UploadFile = File(...)):
     img_embedding = get_image_embedding(image)
     return img_embedding
 
+
+@app.post("/search_by_images/")
+async def search_by_images(file1: UploadFile = File(...), file2: UploadFile = File(...)):
+    image1 = Image.open(io.BytesIO(await file1.read()))
+    image2 = Image.open(io.BytesIO(await file2.read()))
+
+    vector1 = image_to_vector(image1)
+    vector2 = image_to_vector(image2)
+
+    merged_vector = np.concatenate((vector1, vector2))
+
+    print(merged_vector)
+
+    return JSONResponse(content={"merged_vector": merged_vector.tolist()})
