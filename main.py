@@ -1,13 +1,12 @@
 import io
 from io import BytesIO
 
-import numpy as np
 import requests
 from PIL import Image
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from sentence_transformers import SentenceTransformer
+from starlette.responses import JSONResponse
 
 from yolo.yolo_router import yolo_router
 
@@ -60,14 +59,41 @@ async def image_to_vector(file: UploadFile = File(...)):
     return img_embedding
 
 
+# @app.post("/search_by_images/")
+# async def search_by_images(file1: UploadFile = File(...), file2: UploadFile = File(...)):
+#
+#
+
+    # vector1 = await image_to_vector(file1)
+    # vector2 = await image_to_vector(file2)
+    #
+    # merged_vector = np.concatenate((vector1, vector2))
+    #
+    # # 1024
+    # print(f"merged_vector {len(merged_vector)}")
+    # vector_merge = np.resize(merged_vector, 512)
+    #
+    # return JSONResponse(content={"merged_vector": vector_merge.tolist()})
+
+
 @app.post("/search_by_images/")
 async def search_by_images(file1: UploadFile = File(...), file2: UploadFile = File(...)):
-    vector1 = await image_to_vector(file1)
-    vector2 = await image_to_vector(file2)
+    image1 = await load_image(file1)
+    image2 = await load_image(file2)
 
-    merged_vector = np.concatenate((vector1, vector2))
+    # Get the size of the images
+    width1, height1 = image1.size
+    width2, height2 = image2.size
 
-    # 1024
-    print(f"merged_vector {len(merged_vector)}")
+    # Create a new image with the combined width and the maximum height
+    merged_image = Image.new('RGB', (width1 + width2, max(height1, height2)))
 
-    return JSONResponse(content={"merged_vector": merged_vector.tolist()})
+    # Paste the images into the new image
+    merged_image.paste(image1, (0, 0))
+    merged_image.paste(image2, (width1, 0))
+    merged_image.save("merged_image.jpg")
+
+    # Get the image embedding directly from the merged image
+    img_embedding = get_image_embedding(merged_image)
+
+    return JSONResponse(content={"merged_vector": img_embedding})
