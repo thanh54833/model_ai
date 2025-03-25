@@ -62,14 +62,12 @@ async def image_to_vector(file: UploadFile = File(...)):
 
 @app.post("/search_by_images/")
 async def search_by_images(file1: UploadFile = File(...), file2: UploadFile = File(...)):
-    image1 = Image.open(io.BytesIO(await file1.read()))
-    image2 = Image.open(io.BytesIO(await file2.read()))
-
-    vector1 = image_to_vector(image1)
-    vector2 = image_to_vector(image2)
+    vector1 = await image_to_vector(file1)
+    vector2 = await image_to_vector(file2)
 
     merged_vector = np.concatenate((vector1, vector2))
 
-    #print(f"merged_vector {len(vector1)}")
+    # 1024
+    print(f"merged_vector {len(merged_vector)}")
 
     return JSONResponse(content={"merged_vector": merged_vector.tolist()})
