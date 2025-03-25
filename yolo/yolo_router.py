@@ -16,7 +16,7 @@ def detect_and_crop_objects(image: Image.Image, margin=0):
     img_width, img_height = image.size
 
     # Perform object detection
-    results = model.predict(image)
+    results = model.predict(image, conf=0.70)
 
     # Extract bounding boxes, labels, and confidence scores
     boxes = results[0].boxes.xyxy.tolist()  # Bounding box coordinates (x1, y1, x2, y2)
