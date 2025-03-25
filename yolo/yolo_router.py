@@ -1,6 +1,7 @@
 import base64
 import io
 import os
+import time
 
 from PIL import Image, ExifTags
 from fastapi import File, UploadFile, APIRouter
@@ -116,6 +117,7 @@ def detect_and_crop_objects(image: Image.Image, margin=0, excludes=None):
     # Create a directory to save cropped objects
     os.makedirs("cropped_objects", exist_ok=True)
 
+    print("exclude_ids {exclude_ids}")
     # Crop and save detected objects
     cropped_images = []
     for i, (box, conf, cls_id) in enumerate(zip(boxes, confidences, class_ids)):
@@ -156,27 +158,37 @@ def correct_image_orientation(image):
 
 
 @yolo_router.post("/detect-and-crop/")
-async def detect_and_crop(file: UploadFile = File(...), excludes: list[str] = None):
-    if excludes is None:
-        excludes = []
+async def detect_and_crop(file: UploadFile = File(...), excludes: str = None):
+    start = time.time()
+    excludes_ = excludes.split(",") if excludes else []
 
     image_ = Image.open(io.BytesIO(await file.read()))
     # Correct the orientation of the image
     image_ = correct_image_orientation(image_)
 
-    image_.save("image_input.jpg")
-
+    # image_.save("image_input.jpg")
     width, height = image_.size
     image = image_.resize((600, int(height * 600 / width)))
 
-    cropped_images = detect_and_crop_objects(image, excludes=excludes)
+    cropped_images = detect_and_crop_objects(image, excludes=excludes_)
     # Convert cropped images to base64 strings and include confidence scores and class names
     cropped_images_base64 = []
+
     for cropped_image, cls_id, conf in cropped_images:
         buffered = io.BytesIO()
         cropped_image.save(buffered, format="PNG")
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
         class_name = class_names.get(cls_id, "unknown")
-        cropped_images_base64.append({"image": img_str, "score": conf, "label": class_name})
+        end = time.time()
+        duration = end - start
+        cropped_images_base64.append({"image": img_str, "score": conf, "label": class_name, "duration": str(duration)})
+
+    if not cropped_images_base64:
+        buffered = io.BytesIO()
+        image_.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        end = time.time()
+        duration = end - start
+        return JSONResponse(content={"image": img_str, "label": "original", "duration": str(duration)})
 
     return JSONResponse(content=cropped_images_base64)
