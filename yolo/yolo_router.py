@@ -96,7 +96,13 @@ class_names = {
 }
 
 
-def detect_and_crop_objects(image: Image.Image, margin=0):
+def detect_and_crop_objects(image: Image.Image, margin=0, excludes=None):
+    if excludes is None:
+        excludes = []
+
+    # Convert class names to class IDs
+    exclude_ids = [cls_id for cls_id, name in class_names.items() if name in excludes]
+
     img_width, img_height = image.size
 
     # Perform object detection
@@ -113,8 +119,8 @@ def detect_and_crop_objects(image: Image.Image, margin=0):
     # Crop and save detected objects
     cropped_images = []
     for i, (box, conf, cls_id) in enumerate(zip(boxes, confidences, class_ids)):
-        # Exclude humans (class ID 0)
-        if cls_id == 0:
+        # Exclude specified classes
+        if cls_id in exclude_ids:
             continue
         x1, y1, x2, y2 = map(int, box)
         # Add margin and ensure coordinates are within image bounds
@@ -150,7 +156,10 @@ def correct_image_orientation(image):
 
 
 @yolo_router.post("/detect-and-crop/")
-async def detect_and_crop(file: UploadFile = File(...)):
+async def detect_and_crop(file: UploadFile = File(...), excludes: list[str] = None):
+    if excludes is None:
+        excludes = []
+
     image_ = Image.open(io.BytesIO(await file.read()))
     # Correct the orientation of the image
     image_ = correct_image_orientation(image_)
@@ -160,7 +169,7 @@ async def detect_and_crop(file: UploadFile = File(...)):
     width, height = image_.size
     image = image_.resize((600, int(height * 600 / width)))
 
-    cropped_images = detect_and_crop_objects(image)
+    cropped_images = detect_and_crop_objects(image, excludes=excludes)
     # Convert cropped images to base64 strings and include confidence scores and class names
     cropped_images_base64 = []
     for cropped_image, cls_id, conf in cropped_images:
