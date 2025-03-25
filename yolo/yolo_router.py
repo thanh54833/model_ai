@@ -2,7 +2,7 @@ import base64
 import io
 import os
 
-from PIL import Image
+from PIL import Image, ExifTags
 from fastapi import File, UploadFile, APIRouter
 from fastapi.responses import JSONResponse
 from ultralytics import YOLO
@@ -16,7 +16,7 @@ def detect_and_crop_objects(image: Image.Image, margin=0):
     img_width, img_height = image.size
 
     # Perform object detection
-    results = model.predict(image, conf=0.70)
+    results = model.predict(image, conf=0.25)
 
     # Extract bounding boxes, labels, and confidence scores
     boxes = results[0].boxes.xyxy.tolist()  # Bounding box coordinates (x1, y1, x2, y2)
@@ -29,6 +29,9 @@ def detect_and_crop_objects(image: Image.Image, margin=0):
     # Crop and save detected objects
     cropped_images = []
     for i, (box, conf, cls_id) in enumerate(zip(boxes, confidences, class_ids)):
+        # Exclude humans (class ID 0)
+        if cls_id == 0:
+            continue
         x1, y1, x2, y2 = map(int, box)
         # Add margin and ensure coordinates are within image bounds
         x1 = max(0, x1 - margin)
@@ -41,13 +44,34 @@ def detect_and_crop_objects(image: Image.Image, margin=0):
         print(f"Cropped Object {i}: Class ID {cls_id}, Confidence {conf:.2f}")
 
     print(f"Cropped {len(boxes)} objects!")
-
     return cropped_images, confidences
+
+
+def correct_image_orientation(image):
+    try:
+        exif = image._getexif()
+        if exif:
+            for tag, value in exif.items():
+                if ExifTags.TAGS.get(tag) == 'Orientation':
+                    # Rotate the image based on the EXIF orientation
+                    if value == 3:
+                        image = image.rotate(180, expand=True)
+                    elif value == 6:
+                        image = image.rotate(270, expand=True)
+                    elif value == 8:
+                        image = image.rotate(90, expand=True)
+    except Exception as e:
+        print(f"Error reading EXIF data: {e}")
+    return image
 
 
 @yolo_router.post("/detect-and-crop/")
 async def detect_and_crop(file: UploadFile = File(...)):
     image_ = Image.open(io.BytesIO(await file.read()))
+    # Correct the orientation of the image
+    image_ = correct_image_orientation(image_)
+
+    image_.save("image_input.jpg")
 
     width, height = image_.size
     image = image_.resize((600, int(height * 600 / width)))
