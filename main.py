@@ -62,24 +62,12 @@ async def image_to_vector(file: UploadFile = File(...)):
 
 @app.post("/search_by_images/")
 async def search_by_images(file1: UploadFile = File(...), file2: UploadFile = File(...)):
-    image1 = await load_image(file1)
-    image2 = await load_image(file2)
-    vectors = model.encode_multi_process(
-        [image1, image2], batch_size=128, show_progress_bar=False
-    ).tolist()
+    vector1 = await image_to_vector(file1)
+    vector2 = await image_to_vector(file2)
 
-    merged_vector = vectors[0] + vectors[1]  # Assuming you want to concatenate the vectors
-    print(f"merged_vector length: {len(merged_vector)}")
+    merged_vector = np.concatenate((vector1, vector2))
 
-    # return JSONResponse(content={"merged_vector": merged_vector.tolist()})
+    # 1024
+    print(f"merged_vector {len(merged_vector)}")
 
-    return {}
-
-# {
-#     "results": [
-#         {
-#             "code": 400,
-#             "error": "Query field `img_embedding` must have 512 dimensions."
-#         }
-#     ]
-# }
+    return JSONResponse(content={"merged_vector": merged_vector.tolist()})
