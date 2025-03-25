@@ -11,6 +11,7 @@ yolo_router = APIRouter()
 
 model = YOLO("yolo11n.pt")
 
+
 def detect_and_crop_objects(image: Image.Image, margin=0):
     img_width, img_height = image.size
 
@@ -49,7 +50,7 @@ async def detect_and_crop(file: UploadFile = File(...)):
     image_ = Image.open(io.BytesIO(await file.read()))
 
     width, height = image_.size
-    image = image_.resize((600, int(height * 600/width)))
+    image = image_.resize((600, int(height * 600 / width)))
 
     cropped_images, confidences = detect_and_crop_objects(image)
     # Convert cropped images to base64 strings and include confidence scores
