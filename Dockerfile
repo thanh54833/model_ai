@@ -1,11 +1,6 @@
 # Use the official Python image from the Docker Hub
 FROM python:3.10-slim
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
-    && rm -rf /var/lib/apt/lists/*
-
 # Set the working directory in the container
 WORKDIR /app
 
