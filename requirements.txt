@@ -4,3 +4,4 @@ pillow
 uvicorn
 python-multipart
 locust
+ultralytics

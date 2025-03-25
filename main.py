@@ -70,6 +70,6 @@ async def search_by_images(file1: UploadFile = File(...), file2: UploadFile = Fi
 
     merged_vector = np.concatenate((vector1, vector2))
 
-    print(f"merged_vector {len(merged_vector)}")
+    #print(f"merged_vector {len(vector1)}")
 
     return JSONResponse(content={"merged_vector": merged_vector.tolist()})
