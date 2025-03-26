@@ -10,7 +10,9 @@ from ultralytics import YOLO
 
 yolo_router = APIRouter()
 
-model = YOLO("yolo11n.pt")
+model_yolo11n = YOLO("yolo11n.pt")
+model_yolo11x = YOLO("yolo11x.pt")
+
 
 # Class names mapping
 class_names = {
@@ -97,7 +99,10 @@ class_names = {
 }
 
 
-def detect_and_crop_objects(image: Image.Image, margin=0, excludes=None):
+def detect_and_crop_objects(image: Image.Image, margin=0, excludes=None,model: str = None):
+
+    model_ = model_yolo11n if model == "yolo11n" else model_yolo11x
+
     if excludes is None:
         excludes = []
 
@@ -107,7 +112,7 @@ def detect_and_crop_objects(image: Image.Image, margin=0, excludes=None):
     img_width, img_height = image.size
 
     # Perform object detection
-    results = model.predict(image, conf=0.25)
+    results = model_.predict(image, conf=0.25)
 
     # Extract bounding boxes, labels, and confidence scores
     boxes = results[0].boxes.xyxy.tolist()  # Bounding box coordinates (x1, y1, x2, y2)
@@ -187,7 +192,7 @@ def correct_image_orientation(image):
 # _, predicted = torch.max(output, 1)
 # print(f'Predicted class: {predicted.item()}')
 @yolo_router.post("/detect-and-crop/")
-async def detect_and_crop(file: UploadFile = File(...), excludes: str = None):
+async def detect_and_crop(file: UploadFile = File(...), excludes: str = None, model: str = None):
     start = time.time()
     excludes_ = excludes.split(",") if excludes else []
 
@@ -199,7 +204,7 @@ async def detect_and_crop(file: UploadFile = File(...), excludes: str = None):
     width, height = image_.size
     image = image_.resize((600, int(height * 600 / width)))
 
-    cropped_images = detect_and_crop_objects(image, excludes=excludes_)
+    cropped_images = detect_and_crop_objects(image, excludes=excludes_,model=model)
     # Convert cropped images to base64 strings and include confidence scores and class names
     cropped_images_base64 = []
 
