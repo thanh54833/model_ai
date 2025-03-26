@@ -157,6 +157,35 @@ def correct_image_orientation(image):
     return image
 
 
+# import torch
+# import torchvision.models as models
+# from torchvision import transforms
+# from PIL import Image
+#
+# # Load the pre-trained ResNet-50 model
+# model = models.resnet50(pretrained=True)
+# model.eval()
+#
+# # Define the image transformations
+# preprocess = transforms.Compose([
+#     transforms.Resize(256),
+#     transforms.CenterCrop(224),
+#     transforms.ToTensor(),
+#     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+# ])
+#
+# # Load and preprocess the image
+# img = Image.open("path_to_your_image.jpg")
+# img_t = preprocess(img)
+# batch_t = torch.unsqueeze(img_t, 0)
+#
+# # Perform inference
+# with torch.no_grad():
+#     output = model(batch_t)
+#
+# # Get the predicted class
+# _, predicted = torch.max(output, 1)
+# print(f'Predicted class: {predicted.item()}')
 @yolo_router.post("/detect-and-crop/")
 async def detect_and_crop(file: UploadFile = File(...), excludes: str = None):
     start = time.time()
