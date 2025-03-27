@@ -11,8 +11,8 @@ from ultralytics import YOLO
 yolo_router = APIRouter()
 
 model_yolo11n = YOLO("yolo11n.pt")
-model_yolo11x = YOLO("yolo11x.pt")
-
+# model_yolo11x = YOLO("yolo11x.pt")
+model_yolo11s = YOLO("yolo11s.pt")
 
 # Class names mapping
 class_names = {
@@ -99,9 +99,8 @@ class_names = {
 }
 
 
-def detect_and_crop_objects(image: Image.Image, margin=0, excludes=None,model: str = None):
-
-    model_ = model_yolo11n if model == "yolo11n" else model_yolo11x
+def detect_and_crop_objects(image: Image.Image, margin=0, excludes=None, model: str = None):
+    model_ = model_yolo11n if model == "yolo11n" else model_yolo11s
 
     if excludes is None:
         excludes = []
@@ -204,7 +203,7 @@ async def detect_and_crop(file: UploadFile = File(...), excludes: str = None, mo
     width, height = image_.size
     image = image_.resize((600, int(height * 600 / width)))
 
-    cropped_images = detect_and_crop_objects(image, excludes=excludes_,model=model)
+    cropped_images = detect_and_crop_objects(image, excludes=excludes_, model=model)
     # Convert cropped images to base64 strings and include confidence scores and class names
     cropped_images_base64 = []
 
